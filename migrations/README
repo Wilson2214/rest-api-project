@@ -1,3 +1,1 @@
 Single-database configuration for Flask.
-
-All files in this folder are automatically created when running $ flask db init
