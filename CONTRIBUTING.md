@@ -19,3 +19,9 @@ RUN pip install -r requirements.txt
 COPY . .
 CMD ["flask", "run", "--host", "0.0.0.0"]
 ```
+
+Will also need to create a .env file locally with postgres url:
+
+```
+DATABASE_URL = postgresql: ...
+```

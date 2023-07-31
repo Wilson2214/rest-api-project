@@ -5,6 +5,8 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 import os
 
+from dotenv import load_dotenv
+
 from db import db
 import models
 from blocklist import BLOCKLIST
@@ -18,8 +20,11 @@ from resources.user import blp as UserBlueprint
 def create_app(db_url=None):
     app = Flask(__name__)
 
+    # Load environment file to allow for loading of postgresql database url
+    load_dotenv()
+
     # App Settings
-    # # Hidden exceptions in flask should be brought into main app
+    # Hidden exceptions in flask should be brought into main app
     app.config["PROPAGATE_EXCEPTIONS"] = True
 
     # For documentation
@@ -41,6 +46,7 @@ def create_app(db_url=None):
 
     # Connection String for Database
     # Option for Development: sqllite:///data.db (Data will be stored in data.db file)
+    # Option for Production: uses DATABASE_URL from .env currently pointing to ElephantSQL
     # Will eventually migrate to PostGres
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv("DATABASE_URL", "sqlite:///data.db")
 
