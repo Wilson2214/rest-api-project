@@ -8,8 +8,21 @@ from db import db
 from models import UserModel
 from schemas import UserSchema
 from blocklist import BLOCKLIST
+import requests
+import os
 
 blp = Blueprint("Users", "users", description="Operations on users")
+
+# Add function to send via Mailgun
+def send_simple_message(to, subject, body):
+    domain = os.getenv("MAILGUN_DOMAIN")
+	return requests.post(
+		f"https://api.mailgun.net/v3/{domain}/messages",
+		auth=("api", os.getenv("MAILGUN_API_KEY")),
+		data={"from": "Dave Wilson <mailgun@{domain}>",
+			"to": [to],
+			"subject": subject,
+			"text": body})
 
 # Create user login endpoint
 @blp.route("/login")
