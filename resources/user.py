@@ -3,10 +3,11 @@ from flask_smorest import Blueprint, abort
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy.exc import SQLAlchemyError
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required, create_refresh_token, get_jwt_identity
+from sqlalchemy import or_
 
 from db import db
 from models import UserModel
-from schemas import UserSchema
+from schemas import UserSchema, UserRegisterSchema
 from blocklist import BLOCKLIST
 import requests
 import os
@@ -80,7 +81,12 @@ class UserRegister(MethodView):
     # Define a post request accepting data via the UserSchema (includes id, username, and password via user_data i.e. json payload)
     def post(self,user_data):
         # Add a check to see if the user_data payload username is already in the database for registration
-        if UserModel.query.filter(UserModel.username == user_data["username"]).first():
+        if UserModel.query.filter(
+            or_(
+                UserModel.username == user_data["username"],
+                UserModel.email == user_data["email"]
+                )
+        ).first():
             # If it is abort
             abort(409, message="A user with that username already exists.")
 
@@ -88,6 +94,7 @@ class UserRegister(MethodView):
         # This is a manual creation instead of using something like ItemModel(**item_data) where we directly pass user_data
         user = UserModel(
             username=user_data["username"],
+            email=user_data['email'],
             # Use the hash functionality to hide the password prior to saving
             password=pbkdf2_sha256.hash(user_data["password"])
         )
@@ -97,6 +104,12 @@ class UserRegister(MethodView):
             db.session.add(user)
             # Write to database (save to disk)
             db.session.commit()
+            # Send message upon registration
+            send_simple_message(
+                to=user.email,
+                subject='Successfully signed up!',
+                body=f"Hi {user.username}! You have successfully signed up to the Stores REST API."
+            )
         # Unless there is a generic error with inserting into the database
         except SQLAlchemyError:
             abort(500, message="An error occurred while inserting the item.")

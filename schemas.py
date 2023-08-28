@@ -52,3 +52,6 @@ class UserSchema(Schema):
     username = fields.Str(required=True)
     # never save the password or send this data
     password = fields.Str(required=True, load_only=True)
+
+class UserRegisterSchema(UserSchema):
+    email = fields.Str(required=True)
