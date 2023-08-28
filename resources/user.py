@@ -77,7 +77,7 @@ class TokenRefresh(MethodView):
 # Create a User Registration class inheriting from MethodView which comes from flask.views
 class UserRegister(MethodView):
     # Define the request and assign the schema with a decorator (in this case the UserSchema from schemas.py)
-    @blp.arguments(UserSchema)
+    @blp.arguments(UserRegisterSchema)
     # Define a post request accepting data via the UserSchema (includes id, username, and password via user_data i.e. json payload)
     def post(self,user_data):
         # Add a check to see if the user_data payload username is already in the database for registration
