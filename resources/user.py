@@ -81,20 +81,20 @@ class UserRegister(MethodView):
     # Define a post request accepting data via the UserSchema (includes id, username, and password via user_data i.e. json payload)
     def post(self,user_data):
         # Add a check to see if the user_data payload username is already in the database for registration
-        # if UserModel.query.filter(
-        #     or_(
-        #         UserModel.username == user_data["username"],
-        #         UserModel.email == user_data["email"],
-        #         )
-        # ).first():
-        #     # If it is abort
-        #     abort(409, message="A user with that username already exists.")
+        if UserModel.query.filter(
+            or_(
+                UserModel.username == user_data["username"],
+                UserModel.email == user_data["email"],
+                )
+        ).first():
+            # If it is abort
+            abort(409, message="A user with that username already exists.")
 
         # To create an object to be entered into the database model, assign the username and password
         # This is a manual creation instead of using something like ItemModel(**item_data) where we directly pass user_data
         user = UserModel(
             username=user_data["username"],
-            email=user_data['email'],
+            email=user_data["email"],
             # Use the hash functionality to hide the password prior to saving
             password=pbkdf2_sha256.hash(user_data["password"])
         )
