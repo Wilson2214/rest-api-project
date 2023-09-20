@@ -17,6 +17,9 @@ blp = Blueprint("Users", "users", description="Operations on users")
 # Add function to send via Mailgun
 def send_simple_message(to, subject, body):
     domain = os.getenv("MAILGUN_DOMAIN")
+    print(os.getenv("MAILGUN_DOMAIN"))
+    print(os.getenv("MAILGUN_API_KEY"))
+    print("Message sent to " + to)
     return requests.post(
 		f"https://api.mailgun.net/v3/{domain}/messages",
 		auth=("api", os.getenv("MAILGUN_API_KEY")),
