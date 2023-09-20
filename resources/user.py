@@ -96,7 +96,7 @@ class UserRegister(MethodView):
             db.session.commit()
             # Send message upon registration
             current_app.queue.enqueue(send_user_registration_email, user.email, user.username)
-            
+
         # Unless there is a generic error with inserting into the database
         except SQLAlchemyError:
             abort(500, message="An error occurred while inserting the item.")

@@ -15,3 +15,10 @@ def send_simple_message(to, subject, body):
             "subject": subject,
             "text": body}
     )
+
+def send_user_registration_email(email, username):
+    return send_simple_message(
+        email,
+        "Successfully signed up",
+        f"Hi {username}! You have successfully signed up to the Stores REST API.",
+    )
