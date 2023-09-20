@@ -9,24 +9,11 @@ from db import db
 from models import UserModel
 from schemas import UserSchema, UserRegisterSchema
 from blocklist import BLOCKLIST
-import requests
-import os
+
+from tasks import send_user_registration_email
+from flask import current_app
 
 blp = Blueprint("Users", "users", description="Operations on users")
-
-# Add function to send via Mailgun
-def send_simple_message(to, subject, body):
-    domain = os.getenv("MAILGUN_DOMAIN")
-    print(os.getenv("MAILGUN_DOMAIN"))
-    print(os.getenv("MAILGUN_API_KEY"))
-    print("Message sent to " + to)
-    return requests.post(
-		f"https://api.mailgun.net/v3/{domain}/messages",
-		auth=("api", os.getenv("MAILGUN_API_KEY")),
-		data={"from": f"Dave Wilson <mailgun@{domain}>",
-			"to": [to],
-			"subject": subject,
-			"text": body})
 
 # Create user login endpoint
 @blp.route("/login")
@@ -108,11 +95,8 @@ class UserRegister(MethodView):
             # Write to database (save to disk)
             db.session.commit()
             # Send message upon registration
-            send_simple_message(
-                to=user.email,
-                subject='Successfully signed up!',
-                body=f"Hi {user.username}! You have successfully signed up to the Stores REST API."
-            )
+            current_app.queue.enqueue(send_user_registration_email, user.email, user.username)
+            
         # Unless there is a generic error with inserting into the database
         except SQLAlchemyError:
             abort(500, message="An error occurred while inserting the item.")

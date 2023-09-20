@@ -4,8 +4,10 @@ from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 import os
+import redis
 
 from dotenv import load_dotenv
+from rq import Queue
 
 from db import db
 import models
@@ -22,6 +24,12 @@ def create_app(db_url=None):
 
     # Load environment file to allow for loading of postgresql database url
     load_dotenv()
+
+    # Setup Queue
+    connection = redis.from_url(
+        os.getenv("REDIS_URL")
+    )
+    app.queue = Queue("emails", connection=connection)
 
     # App Settings
     # Hidden exceptions in flask should be brought into main app
